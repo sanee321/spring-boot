@@ -5,86 +5,86 @@ services:
     volumes:
       - .:/build
       - m2-repo:/root/.m2
-    command: mvn clean install -DskipTests
+    command: mvn clean package -DskipTests
 
   auth-service:
-    build: ./auth-service
+    image: auth-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./auth-service/target:/app/target
     ports:
       - "9000:9000"
 
   user-service:
-    build: ./user-service
+    image: user-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./user-service/target:/app/target
     ports:
       - "8081:8081"
 
   api-gateway:
-    build: ./api-gateway
+    image: api-gateway
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./api-gateway/target:/app/target
     ports:
       - "8080:8080"
 
   product-service:
-    build: ./product-service
+    image: product-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./product-service/target:/app/target
     ports:
       - "8082:8082"
 
   order-service:
-    build: ./order-service
+    image: order-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./order-service/target:/app/target
     ports:
       - "8083:8083"
 
   payment-service:
-    build: ./payment-service
+    image: payment-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./payment-service/target:/app/target
     ports:
       - "8084:8084"
 
   notification-service:
-    build: ./notification-service
+    image: notification-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./notification-service/target:/app/target
     ports:
       - "8085:8085"
 
   inventory-service:
-    build: ./inventory-service
+    image: inventory-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./inventory-service/target:/app/target
     ports:
       - "8086:8086"
 
   review-service:
-    build: ./review-service
+    image: review-service
     depends_on:
       - maven-build
     volumes:
-      - m2-repo:/root/.m2
+      - ./review-service/target:/app/target
     ports:
       - "8087:8087"
 
