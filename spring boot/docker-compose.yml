@@ -8,83 +8,74 @@ services:
     command: mvn clean install -Dmaven.test.skip=true
 
   auth-service:
-    image: auth-service
+    build:
+      context: ./auth-service
     depends_on:
       - maven-build
-    volumes:
-      - ./auth-service/target:/app/target
     ports:
       - "9000:9000"
 
   user-service:
-    image: user-service
+    build:
+      context: ./user-service
     depends_on:
       - maven-build
-    volumes:
-      - ./user-service/target:/app/target
     ports:
       - "8081:8081"
 
   api-gateway:
-    image: api-gateway
+    build:
+      context: ./api-gateway
     depends_on:
       - maven-build
-    volumes:
-      - ./api-gateway/target:/app/target
     ports:
       - "8080:8080"
 
   product-service:
-    image: product-service
+    build:
+      context: ./product-service
     depends_on:
       - maven-build
-    volumes:
-      - ./product-service/target:/app/target
     ports:
       - "8082:8082"
 
   order-service:
-    image: order-service
+    build:
+      context: ./order-service
     depends_on:
       - maven-build
-    volumes:
-      - ./order-service/target:/app/target
     ports:
       - "8083:8083"
 
   payment-service:
-    image: payment-service
+    build:
+      context: ./payment-service
     depends_on:
       - maven-build
-    volumes:
-      - ./payment-service/target:/app/target
     ports:
       - "8084:8084"
 
   notification-service:
-    image: notification-service
+    build:
+      context: ./notification-service
     depends_on:
       - maven-build
-    volumes:
-      - ./notification-service/target:/app/target
     ports:
       - "8085:8085"
 
   inventory-service:
-    image: inventory-service
+    build:
+      context: ./inventory-service
     depends_on:
       - maven-build
-    volumes:
-      - ./inventory-service/target:/app/target
     ports:
       - "8086:8086"
 
   review-service:
-    image: review-service
+    build:
+      context: ./review-service
     depends_on:
       - maven-build
-    volumes:
-      - ./review-service/target:/app/target
     ports:
       - "8087:8087"
 
