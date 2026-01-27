@@ -1,0 +1,145 @@
+version: "3.8"
+
+networks:
+  microservices-network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: microservices
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-network
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_PROVIDER_AUTHSERVER_ISSUERURI: http://auth-service:9000
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_REDIRECTURI: http://api-gateway:8080/login/oauth2/code/client
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_AUTHORIZATIONSERVER_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+  review-service:
+    build: ./review-service
+    ports:
+      - "8087:8087"
+    depends_on:
+      - auth-service
+      - db
+    networks:
+      - microservices-network
+    environment:
+      SPRING_DATASOURCE_PASSWORD: password

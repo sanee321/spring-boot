@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  labels:
+    app: auth-service
+data:
+  SERVER_PORT: "9000"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+  SPRING_SECURITY_OAUTH2_AUTHORIZATIONSERVER_ISSUER_URI: "http://auth-service:9000"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/microservices"
+  SPRING_DATASOURCE_USERNAME: "user"
