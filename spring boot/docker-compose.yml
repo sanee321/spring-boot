@@ -1,603 +1,72 @@
 version: "3.8"
 
-networks:
-  microservices-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-
 services:
-  # Build Parent POM First (CRITICAL - installs ecommerce-parent)
   maven-build:
     image: maven:3.9-eclipse-temurin-17
     working_dir: /build
     volumes:
       - .:/build
     command: mvn clean install -DskipTests
-    networks:
-      - microservices-network
 
-  # PostgreSQL Database
-  db:
-    image: postgres:13-alpine
-    container_name: microservices-db
-    environment:
-      POSTGRES_DB: microservices
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    networks:
-      - microservices-network
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d microservices"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # OAuth2 Authorization Server
   auth-service:
     build: ./auth-service
-    container_name: auth-service
+    depends_on:
+      - maven-build
     ports:
       - "9000:9000"
-    depends_on:
-      - maven-build
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: auth-service
-      SPRING_SECURITY_OAUTH2_AUTHORIZATIONSERVER_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 9000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
 
-  # API Gateway
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - maven-build
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: api-gateway
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_PROVIDER_AUTHSERVER_ISSUERURI: http://auth-service:9000
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_REDIRECTURI: http://api-gateway:8080/login/oauth2/code/client
-      SERVER_PORT: 8080
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # User Service
   user-service:
     build: ./user-service
-    container_name: user-service
+    depends_on:
+      - maven-build
     ports:
       - "8081:8081"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: user-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8081
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
 
-  # Product Service
-  product-service:
-    build: ./product-service
-    container_name: product-service
-    ports:
-      - "8082:8082"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: product-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8082
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Order Service
-  order-service:
-    build: ./order-service
-    container_name: order-service
-    ports:
-      - "8083:8083"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: order-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8083
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Payment Service
-  payment-service:
-    build: ./payment-service
-    container_name: payment-service
-    ports:
-      - "8084:8084"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: payment-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8084
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Notification Service
-  notification-service:
-    build: ./notification-service
-    container_name: notification-service
-    ports:
-      - "8085:8085"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: notification-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8085
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Inventory Service
-  inventory-service:
-    build: ./inventory-service
-    container_name: inventory-service
-    ports:
-      - "8086:8086"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: inventory-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8086
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Review Service
-  review-service:
-    build: ./review-service
-    container_name: review-service
-    ports:
-      - "8087:8087"
-    depends_on:
-      - maven-build
-      - db
-      - auth-service
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: review-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8087
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-    environment:
-      SPRING_APPLICATION_NAME: auth-service
-      SPRING_SECURITY_OAUTH2_AUTHORIZATIONSERVER_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 9000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # API Gateway
   api-gateway:
-    build:
-      context: .
-      dockerfile: ./api-gateway/Dockerfile
-    container_name: api-gateway
+    build: ./api-gateway
+    depends_on:
+      - maven-build
     ports:
       - "8080:8080"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: api-gateway
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_PROVIDER_AUTHSERVER_ISSUERURI: http://auth-service:9000
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_REDIRECTURI: http://api-gateway:8080/login/oauth2/code/client
-      SERVER_PORT: 8080
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # User Service
-  user-service:
-    build:
-      context: .
-      dockerfile: ./user-service/Dockerfile
-    container_name: user-service
-    ports:
-      - "8081:8081"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: user-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8081
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Product Service
-  product-service:
-    build:
-      context: .
-      dockerfile: ./product-service/Dockerfile
-    container_name: product-service
-    ports:
-      - "8082:8082"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: product-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8082
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Order Service
-  order-service:
-    build:
-      context: .
-      dockerfile: ./order-service/Dockerfile
-    container_name: order-service
-    ports:
-      - "8083:8083"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: order-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8083
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Payment Service
-  payment-service:
-    build:
-      context: .
-      dockerfile: ./payment-service/Dockerfile
-    container_name: payment-service
-    ports:
-      - "8084:8084"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: payment-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8084
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Notification Service
-  notification-service:
-    build:
-      context: .
-      dockerfile: ./notification-service/Dockerfile
-    container_name: notification-service
-    ports:
-      - "8085:8085"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: notification-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8085
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Inventory Service
-  inventory-service:
-    build:
-      context: .
-      dockerfile: ./inventory-service/Dockerfile
-    container_name: inventory-service
-    ports:
-      - "8086:8086"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: inventory-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8086
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-
-  # Review Service
-  review-service:
-    build:
-      context: .
-      dockerfile: ./review-service/Dockerfile
-    container_name: review-service
-    ports:
-      - "8087:8087"
-    depends_on:
-      parent-build:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    environment:
-      SPRING_APPLICATION_NAME: review-service
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SERVER_PORT: 8087
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   product-service:
     build: ./product-service
+    depends_on:
+      - maven-build
     ports:
       - "8082:8082"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   order-service:
     build: ./order-service
+    depends_on:
+      - maven-build
     ports:
       - "8083:8083"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   payment-service:
     build: ./payment-service
+    depends_on:
+      - maven-build
     ports:
       - "8084:8084"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   notification-service:
     build: ./notification-service
+    depends_on:
+      - maven-build
     ports:
       - "8085:8085"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   inventory-service:
     build: ./inventory-service
+    depends_on:
+      - maven-build
     ports:
       - "8086:8086"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservices
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
 
   review-service:
     build: ./review-service
+    depends_on:
+      - maven-build
     ports:
       - "8087:8087"
-    depends_on:
-      - auth-service
-      - db
-    networks:
-      - microservices-network
-    environment:
-      SPRING_DATASOURCE_PASSWORD: password
