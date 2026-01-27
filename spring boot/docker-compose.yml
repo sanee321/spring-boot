@@ -10,6 +10,7 @@ services:
   auth-service:
     build:
       context: ./auth-service
+    container_name: auth-service
     depends_on:
       - maven-build
     ports:
@@ -18,6 +19,7 @@ services:
   user-service:
     build:
       context: ./user-service
+    container_name: user-service
     depends_on:
       - maven-build
     ports:
@@ -26,6 +28,7 @@ services:
   api-gateway:
     build:
       context: ./api-gateway
+    container_name: api-gateway
     depends_on:
       - maven-build
     ports:
@@ -34,6 +37,7 @@ services:
   product-service:
     build:
       context: ./product-service
+    container_name: product-service
     depends_on:
       - maven-build
     ports:
@@ -42,6 +46,7 @@ services:
   order-service:
     build:
       context: ./order-service
+    container_name: order-service
     depends_on:
       - maven-build
     ports:
@@ -50,6 +55,7 @@ services:
   payment-service:
     build:
       context: ./payment-service
+    container_name: payment-service
     depends_on:
       - maven-build
     ports:
@@ -58,6 +64,7 @@ services:
   notification-service:
     build:
       context: ./notification-service
+    container_name: notification-service
     depends_on:
       - maven-build
     ports:
@@ -66,6 +73,7 @@ services:
   inventory-service:
     build:
       context: ./inventory-service
+    container_name: inventory-service
     depends_on:
       - maven-build
     ports:
@@ -74,6 +82,7 @@ services:
   review-service:
     build:
       context: ./review-service
+    container_name: review-service
     depends_on:
       - maven-build
     ports:
