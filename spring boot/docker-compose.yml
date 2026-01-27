@@ -5,7 +5,7 @@ services:
     volumes:
       - .:/build
       - m2-repo:/root/.m2
-    command: mvn clean package -DskipTests
+    command: mvn clean install -Dmaven.test.skip=true
 
   auth-service:
     image: auth-service
