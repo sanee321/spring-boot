@@ -12,7 +12,8 @@ services:
       context: ./auth-service
     container_name: auth-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "9000:9000"
 
@@ -21,7 +22,8 @@ services:
       context: ./user-service
     container_name: user-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8081:8081"
 
@@ -30,7 +32,8 @@ services:
       context: ./api-gateway
     container_name: api-gateway
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
 
@@ -39,7 +42,8 @@ services:
       context: ./product-service
     container_name: product-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8082:8082"
 
@@ -48,7 +52,8 @@ services:
       context: ./order-service
     container_name: order-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8083:8083"
 
@@ -57,7 +62,8 @@ services:
       context: ./payment-service
     container_name: payment-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8084:8084"
 
@@ -66,7 +72,8 @@ services:
       context: ./notification-service
     container_name: notification-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8085:8085"
 
@@ -75,7 +82,8 @@ services:
       context: ./inventory-service
     container_name: inventory-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8086:8086"
 
@@ -84,7 +92,8 @@ services:
       context: ./review-service
     container_name: review-service
     depends_on:
-      - maven-build
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8087:8087"
 
