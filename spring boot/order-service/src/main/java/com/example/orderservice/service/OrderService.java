@@ -86,6 +86,10 @@ public class OrderService {
         return false;
     }
 
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
+    }
+
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(this::mapToResponse)

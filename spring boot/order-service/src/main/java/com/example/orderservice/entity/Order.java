@@ -51,7 +51,3 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 }
-
-enum OrderStatus {
-    PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
-}

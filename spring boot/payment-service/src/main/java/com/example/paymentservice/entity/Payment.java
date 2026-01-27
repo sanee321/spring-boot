@@ -56,7 +56,3 @@ public class Payment {
         updatedAt = LocalDateTime.now();
     }
 }
-
-enum PaymentStatus {
-    PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
-}

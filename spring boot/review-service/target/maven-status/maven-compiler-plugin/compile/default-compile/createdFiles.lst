@@ -1,0 +1,8 @@
+com\example\reviewservice\service\ReviewService.class
+com\example\reviewservice\controller\ReviewController.class
+com\example\reviewservice\repository\ReviewRepository.class
+com\example\reviewservice\entity\Review.class
+com\example\reviewservice\ReviewServiceApplication.class
+com\example\reviewservice\dto\ReviewRequest.class
+com\example\reviewservice\dto\ReviewResponse.class
+com\example\reviewservice\ResourceServerConfig.class

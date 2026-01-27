@@ -1,8 +1,10 @@
 package com.example.orderservice.controller;
 
-import com.example.orderservice.entity.Order;
+import com.example.orderservice.dto.OrderRequest;
+import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -16,25 +18,26 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public Order createOrder(@Valid @RequestBody Order order) {
-        return orderService.createOrder(order);
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
+        OrderResponse response = orderService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id)
                 .map(order -> ResponseEntity.ok().body(order))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public List<Order> getOrdersByUserId(@PathVariable Long userId) {
+    public List<OrderResponse> getOrdersByUserId(@PathVariable Long userId) {
         return orderService.getOrdersByUserId(userId);
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
-        Order updatedOrder = orderService.updateOrderStatus(id, status);
+    public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
+        OrderResponse updatedOrder = orderService.updateOrderStatus(id, status);
         if (updatedOrder != null) {
             return ResponseEntity.ok(updatedOrder);
         }
