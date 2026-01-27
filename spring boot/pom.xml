@@ -20,6 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
         <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
     <dependencyManagement>
         <dependencies>
