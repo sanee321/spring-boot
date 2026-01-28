@@ -7,6 +7,16 @@ services:
       - m2-repo:/root/.m2
     command: mvn clean install -Dmaven.test.skip=true
 
+  eureka-server:
+    image: netflixoss/eureka:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SERVER_PORT=8761
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+
   auth-service:
     build:
       context: ./auth-service
@@ -14,8 +24,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "9000:9000"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   user-service:
     build:
@@ -24,8 +38,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   api-gateway:
     build:
@@ -34,8 +52,14 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
+      auth-service:
+        condition: service_started
     ports:
       - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   product-service:
     build:
@@ -44,8 +68,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   order-service:
     build:
@@ -54,8 +82,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8083:8083"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   payment-service:
     build:
@@ -64,8 +96,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8084:8084"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   notification-service:
     build:
@@ -74,8 +110,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8085:8085"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   inventory-service:
     build:
@@ -84,8 +124,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8086:8086"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
   review-service:
     build:
@@ -94,8 +138,12 @@ services:
     depends_on:
       maven-build:
         condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
     ports:
       - "8087:8087"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 
 volumes:
   m2-repo:
