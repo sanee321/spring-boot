@@ -139,5 +139,6 @@
         <module>notification-service</module>
         <module>inventory-service</module>
         <module>review-service</module>
+        <module>discovery-service</module>
     </modules>
 </project>

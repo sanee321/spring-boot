@@ -8,14 +8,14 @@ services:
     command: mvn clean install -Dmaven.test.skip=true
 
   eureka-server:
-    image: netflixoss/eureka:latest
+    build:
+      context: ./discovery-service
     container_name: eureka-server
+    depends_on:
+      maven-build:
+        condition: service_completed_successfully
     ports:
       - "8761:8761"
-    environment:
-      - SERVER_PORT=8761
-      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
-      - EUREKA_CLIENT_FETCH_REGISTRY=false
 
   auth-service:
     build:
