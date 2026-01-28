@@ -22,7 +22,11 @@ spring:
             scope: openid,profile
         provider:
           auth-server:
-            issuer-uri: http://auth-service:9000
+            authorization-uri: http://auth-service:9000/oauth2/authorize
+            token-uri: http://auth-service:9000/oauth2/token
+            jwk-set-uri: http://auth-service:9000/oauth2/jwks
+            user-info-uri: http://auth-service:9000/userinfo
+            user-name-attribute: sub
   cloud:
     gateway:
       routes:
