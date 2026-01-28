@@ -4,7 +4,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
 
 spring:
   application:
@@ -22,7 +22,7 @@ spring:
             scope: openid,profile
         provider:
           auth-server:
-            issuer-uri: http://localhost:9000
+            issuer-uri: http://auth-service:9000
   cloud:
     gateway:
       routes:
