@@ -56,8 +56,9 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .anyRequest().authenticated())
+            .formLogin(Customizer.withDefaults());
         return http.build();
     }
 

@@ -9,6 +9,12 @@ spring:
       authorizationserver:
         issuer-uri: http://auth-service:9000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 eureka:
   client:
     service-url:
